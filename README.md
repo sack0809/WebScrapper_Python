@@ -1,2 +1,2 @@
 # WebScrapper_Python
-A simple webscrapper in Pythin
+A simple webscrapper in Python

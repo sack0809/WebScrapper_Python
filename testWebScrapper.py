@@ -6,28 +6,58 @@ Created on Wed Sep 26 09:45:11 2018
 @author: playsafe
 """
 
-from lxml import html
+
 import requests
-from lxml import etree
+import xml.etree.ElementTree as ET
+from lxml import etree,html
+
+
+current_level = 0
+visited = set()
+
 
 myURL="https://wiprodigital.com"
-def create_xml():
-        #global myURL
-        page= requests.get(myURL)
-        tree = html.fromstring(page.content)
-        testExtract=tree.xpath('//a/@href')
-        usrconfig = etree.Element("urls")
-        usrconfig = etree.SubElement(usrconfig,"urls")
-        for i in range(len( testExtract)):
-                testVar= str(testExtract[i])
-                if testVar.startswith(myURL) :
-                    
-                    
-                        usr = etree.SubElement(usrconfig,"childurls")
-                        usr.text = testVar
-        tree = etree.ElementTree(usrconfig)
-        tree.write("details.xml",encoding='utf-8', xml_declaration=True,pretty_print=True)
+queue = [myURL]
 
-create_xml()
+        
+def conquer(childURL):
+    global queue
+    global visited
+    #print("expanding Node " + childURL)
+    p = requests.get(childURL)
+    t = html.fromstring(p.content)
+    child_nodes = t.xpath('//@href')
+    root = etree.Element("root")
+    new_nodes = [x for x in child_nodes if x not in list(visited) and x.startswith(myURL)]
+    if new_nodes != []:
+            child = etree.SubElement(root,"output")
+            child.text = childURL 
+            #print ("Child URL" + childURL)
+            mydata = ET.tostring(child) 
+            myfile = open("results.xml", "ab")  
+            myfile.write(mydata+"\n".encode('ascii'))
+            queue.extend(new_nodes)
+        
+    
+    
+def simpleWebScrap(current_level):
+    global queue
+    global visited
+    for childURL in queue:
+        if childURL.startswith(myURL) and childURL not in visited:
+            visited.add(childURL)
+            #print ("Parent URL :" + childURL)
+            conquer(childURL)
+           
 
+def main ():
+   simpleWebScrap(0)
+
+
+if __name__ == "__main__": main()
+
+
+        
+            
+        
 

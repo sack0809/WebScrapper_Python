@@ -26,7 +26,7 @@ def conquer(childURL):
     #print("expanding Node " + childURL)
     p = requests.get(childURL)
     t = html.fromstring(p.content)
-    child_nodes = t.xpath('//@href')
+    child_nodes = t.xpath('//a/@href')
     root = etree.Element("root")
     new_nodes = [x for x in child_nodes if x not in list(visited) and x.startswith(myURL)]
     if new_nodes != []:
